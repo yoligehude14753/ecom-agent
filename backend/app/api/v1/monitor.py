@@ -22,7 +22,7 @@ async def add_monitor(req: AddMonitorRequest):
     settings = get_settings()
     r = await aioredis.from_url(settings.REDIS_URL)
     key = f"monitor:asin:{req.asin}"
-    await r.set(key, json.dumps(req.dict()))
+    await r.set(key, json.dumps(req.model_dump()))
     await r.aclose()
     return {"status": "added", "asin": req.asin}
 

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
 from typing import Optional
@@ -23,13 +25,16 @@ class OptimizeRequest(BaseModel):
 
 @router.post("/generate")
 async def generate(req: GenerateRequest):
-    listing = await generate_listing(
-        keyword=req.keyword,
-        product_details=req.product_details,
-        marketplace=req.marketplace,
-        language=req.language,
-    )
-    return dataclasses.asdict(listing)
+    try:
+        listing = await generate_listing(
+            keyword=req.keyword,
+            product_details=req.product_details,
+            marketplace=req.marketplace,
+            language=req.language,
+        )
+        return dataclasses.asdict(listing)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.post("/optimize")

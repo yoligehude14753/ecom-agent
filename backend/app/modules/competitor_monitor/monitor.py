@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from datetime import datetime, timezone
 from app.adapters.base import ProductListing
 from app.modules.competitor_monitor.models import CompetitorSnapshot, MonitoredASIN

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import httpx
 import time
 from app.core.config import get_settings

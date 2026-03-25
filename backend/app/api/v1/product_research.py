@@ -1,6 +1,7 @@
-from fastapi import APIRouter, Depends, HTTPException, Query
+from __future__ import annotations
+
+from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
-from typing import Optional
 import dataclasses
 
 from app.modules.product_research import research_category, score_product
@@ -18,24 +19,27 @@ class ResearchRequest(BaseModel):
 
 @router.post("/research")
 async def run_research(req: ResearchRequest):
-    scores = await research_category(
-        req.category,
-        limit=req.limit,
-        min_overall_score=req.min_score,
-        platform=req.platform,
-    )
-    return {"category": req.category, "results": [dataclasses.asdict(s) for s in scores]}
+    try:
+        scores = await research_category(
+            req.category,
+            limit=req.limit,
+            min_overall_score=req.min_score,
+            platform=req.platform,
+        )
+        return {"category": req.category, "results": [dataclasses.asdict(s) for s in scores]}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/score/{asin}")
 async def score_single(asin: str, platform: str = Query("amazon")):
-    adapter = get_adapter(platform)
     try:
+        adapter = get_adapter(platform)
         product = await adapter.get_product(asin)
+        score = await score_product(product)
+        return dataclasses.asdict(score)
     except Exception as e:
-        raise HTTPException(status_code=404, detail=f"Product not found: {e}")
-    score = await score_product(product)
-    return dataclasses.asdict(score)
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/categories")
