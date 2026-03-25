@@ -1,0 +1,16 @@
+.env
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.venv/
+venv/
+node_modules/
+dist/
+build/
+.DS_Store
+*.log
+celerybeat-schedule
+celerybeat.pid
+postgres_data/
+.playwright/
