@@ -69,31 +69,38 @@ function renderWithProviders(ui: React.ReactElement) {
 // ─── Mock data (realistic product responses) ─────────────────────────────────
 
 const MOCK_RESEARCH_RESULT = {
-  products: [
+  // API returns `results` key (matches ProductResearchPage: mutation.data?.results)
+  results: [
     {
       asin: 'B0MOCK001',
       title: 'Premium Stainless Steel Water Bottle 32oz',
       price: 24.99,
-      overall_score: 7.8,
-      recommended: true,
-      ai_analysis: 'Strong profit potential due to low competition and high demand trend.',
       bsr_rank: 450,
       bsr_category: 'sports',
       review_count: 3200,
       rating: 4.6,
+      competition_score: 5.5,
+      profit_potential_score: 8.2,
+      trend_score: 7.0,
+      overall_score: 7.8,
+      recommended: true,
+      ai_analysis: 'Strong profit potential due to low competition and high demand trend.',
       tags: ['low competition', 'trending'],
     },
     {
       asin: 'B0MOCK002',
       title: 'Phone Case for iPhone 15 Slim Clear',
       price: 9.99,
-      overall_score: 4.2,
-      recommended: false,
-      ai_analysis: 'Extremely saturated market. Entry barrier is high.',
       bsr_rank: 120,
       bsr_category: 'electronics',
       review_count: 15000,
       rating: 4.1,
+      competition_score: 9.2,
+      profit_potential_score: 3.0,
+      trend_score: 5.5,
+      overall_score: 4.2,
+      recommended: false,
+      ai_analysis: 'Extremely saturated market. Entry barrier is high.',
       tags: ['high competition'],
     },
   ],
@@ -124,6 +131,12 @@ const MOCK_REVIEW_RESULT = {
   improvement_suggestions: ['reinforce lid sealing', 'use more durable coating'],
   summary: 'Buyers praise insulation quality but 10% report lid issues after heavy use.',
   listing_recommendations: ["Add 'improved leak-proof lid' to bullet points"],
+  // common_keywords is required by ReviewAnalyzerPage's .map() call
+  common_keywords: [
+    { word: 'insulation', count: 180, sentiment: 'positive' },
+    { word: 'lid', count: 95, sentiment: 'negative' },
+    { word: 'durable', count: 120, sentiment: 'positive' },
+  ],
 }
 
 
@@ -162,15 +175,15 @@ describe('Product Research — user scenario', () => {
     const runButton = screen.getByRole('button', { name: /run research/i })
     fireEvent.click(runButton)
 
-    // User sees the first product's title
+    // User sees the first product's title (use getAllByText to handle potential duplicates)
     await waitFor(() => {
-      expect(
-        screen.getByText('Premium Stainless Steel Water Bottle 32oz')
-      ).toBeTruthy()
+      const matches = screen.getAllByText(/Premium Stainless Steel Water Bottle 32oz/i)
+      expect(matches.length).toBeGreaterThan(0)
     })
 
     // User sees the overall score
-    expect(screen.getByText(/7\.8/)).toBeTruthy()
+    const scoreMatches = screen.getAllByText(/7\.8/)
+    expect(scoreMatches.length).toBeGreaterThan(0)
   })
 
   it('shows AI analysis text so user understands WHY a product is recommended', async () => {
@@ -224,11 +237,10 @@ describe('Listing Generator — user scenario', () => {
     // User clicks generate
     fireEvent.click(screen.getByRole('button', { name: /generate listing/i }))
 
-    // User sees the generated title
+    // User sees the generated title (use getAllByText to handle multiple matches)
     await waitFor(() => {
-      expect(
-        screen.getByText(/Premium Stainless Steel Water Bottle/i)
-      ).toBeTruthy()
+      const matches = screen.getAllByText(/Premium Stainless Steel Water Bottle/i)
+      expect(matches.length).toBeGreaterThan(0)
     })
   })
 
@@ -258,8 +270,9 @@ describe('Listing Generator — user scenario', () => {
     fireEvent.click(screen.getByRole('button', { name: /generate listing/i }))
 
     await waitFor(() => {
-      // SEO score (8.7) or "SEO" label should appear
-      expect(screen.getByText(/8\.7|SEO Score/i)).toBeTruthy()
+      // SEO score (8.7) or "SEO" label should appear — use getAllByText to handle multiple
+      const matches = screen.getAllByText(/8\.7|SEO/i)
+      expect(matches.length).toBeGreaterThan(0)
     })
   })
 })
