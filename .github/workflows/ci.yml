@@ -49,7 +49,7 @@ jobs:
           SECRET_KEY: ci-secret-key
           LLM_PROVIDER: openai
           OPENAI_API_KEY: sk-test-ci
-        run: pytest tests/test_core.py -v --tb=short
+        run: python -m pytest tests/test_core.py -v --tb=short
 
       - name: Run user-scenario acceptance tests
         env:
@@ -60,10 +60,10 @@ jobs:
           SECRET_KEY: ci-secret-key
           LLM_PROVIDER: openai
           OPENAI_API_KEY: sk-test-ci
-        run: pytest tests/acceptance/ -v --tb=short
+        run: python -m pytest tests/acceptance/ -v --tb=short
 
       - name: Run model quality eval tests
-        run: pytest tests/eval/ -v --tb=short
+        run: python -m pytest tests/eval/ -v --tb=short
 
   # ─── Frontend: type check + vitest user-scenario tests ──────────────────────
   frontend:
