@@ -113,7 +113,7 @@ export default function DashboardPage() {
           </p>
         </div>
         <a
-          href="https://github.com/yoligehude14753/ecom-agent"
+          href="https://github.com/your-username/ecom-agent"
           target="_blank"
           rel="noopener noreferrer"
           className="flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-white text-sm font-medium transition-colors"

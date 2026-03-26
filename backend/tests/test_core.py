@@ -214,22 +214,7 @@ def test_alert_bsr_change_triggers():
 
 
 # ─── API endpoints (no DB / LLM needed) ───────────────────────────────────────
-
-@pytest.fixture
-def client():
-    """FastAPI test client with mocked DB."""
-    import os
-    os.environ.setdefault("DATABASE_URL", "sqlite+aiosqlite:///./test_api.db")
-    os.environ.setdefault("REDIS_URL", "redis://localhost:6379/0")
-    os.environ.setdefault("CELERY_BROKER_URL", "redis://localhost:6379/0")
-    os.environ.setdefault("CELERY_RESULT_BACKEND", "redis://localhost:6379/1")
-    os.environ.setdefault("SECRET_KEY", "test-secret")
-    os.environ.setdefault("LLM_PROVIDER", "openai")
-    os.environ.setdefault("OPENAI_API_KEY", "sk-test")
-
-    from fastapi.testclient import TestClient
-    from app.main import app
-    return TestClient(app, raise_server_exceptions=False)
+# The shared `client` fixture is provided by tests/conftest.py
 
 
 def test_health_endpoint(client):

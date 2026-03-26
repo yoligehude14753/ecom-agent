@@ -6,8 +6,8 @@ from app.ai.base import BaseLLMProvider, LLMMessage, LLMResponse
 
 
 class OpenAIProvider(BaseLLMProvider):
-    def __init__(self, api_key: str, model: str = "gpt-4o") -> None:
-        self._client = AsyncOpenAI(api_key=api_key, timeout=60.0)
+    def __init__(self, api_key: str, model: str = "gpt-4o", base_url: str | None = None) -> None:
+        self._client = AsyncOpenAI(api_key=api_key, base_url=base_url, timeout=60.0)
         self._model = model
 
     async def chat(

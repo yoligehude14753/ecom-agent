@@ -89,7 +89,7 @@ EcomAgent automates the full Amazon FBA/FBM seller workflow — from product res
 ### 1. Clone & configure
 
 ```bash
-git clone https://github.com/yoligehude14753/ecom-agent
+git clone https://github.com/your-username/ecom-agent
 cd ecom-agent
 cp .env.example .env
 ```
@@ -158,6 +158,64 @@ cd frontend
 npm install
 npm run dev
 ```
+
+## Testing
+
+EcomAgent uses a three-layer testing strategy. All layers must pass before any PR merges.
+
+### Layer 1 — Unit + Integration
+
+Core logic, data models, API endpoint contracts. No network calls.
+
+```bash
+cd backend
+pytest tests/test_core.py -v
+```
+
+### Layer 2 — User-side Acceptance Tests
+
+Validates what the user actually sees: correct response shapes, business rules (e.g. recommended products must score ≥ 6.0). LLM and scrapers are mocked.
+
+```bash
+cd backend
+pytest tests/acceptance/ -v
+```
+
+### Layer 3 — Model Quality Evaluation
+
+Checks that LLM output meets quality rules: bullet format, score-recommendation consistency, ACoS/ROAS logic. Runs against pre-defined mock outputs — no API calls needed.
+
+```bash
+cd backend
+pytest tests/eval/ -v
+```
+
+### Run everything at once
+
+```bash
+cd backend
+pytest tests/ -v        # excludes real_llm tests (CI-safe)
+```
+
+### Frontend tests
+
+```bash
+cd frontend
+npm run test:run         # single pass
+npm run test             # watch mode
+```
+
+### Real LLM tests (local dev only)
+
+For end-to-end quality validation with a live model. Requires an OpenAI-compatible API key.
+
+```bash
+cp backend/.env.dev.example backend/.env.dev
+# Edit .env.dev: set OPENAI_API_KEY and OPENAI_BASE_URL
+source backend/.env.dev && pytest tests/real_llm/ -v -m real_llm -s
+```
+
+These tests are excluded from CI automatically (`pytest.ini` adds `-m "not real_llm"`).
 
 ## Adding a New Platform Adapter
 

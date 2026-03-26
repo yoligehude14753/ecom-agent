@@ -89,6 +89,74 @@ improvement_suggestions[5], common_keywords[15], summary, listing_recommendation
 - `useQuery` with `refetchInterval` for monitor list (auto-refresh)
 - Error handling: show inline error messages, never crash the page
 
+## TDD Workflow
+
+EcomAgent is developed test-first. When adding a feature or fixing a bug, follow this order:
+
+### 1. Write acceptance tests first (`tests/acceptance/`)
+Define what the user sees from the API:
+```python
+@patch("app.adapters.amazon.adapter.AmazonAdapter.get_best_sellers")
+@patch("app.modules.product_research.engine.get_llm_provider")
+def test_acc_product_discovery(mock_llm, mock_scraper, client):
+    mock_scraper.return_value = [ProductListing(...)]
+    mock_llm.return_value.complete = AsyncMock(return_value=json.dumps({...}))
+    resp = client.post("/api/v1/product-research/research", json={"category": "sports"})
+    assert resp.status_code == 200
+    assert "results" in resp.json()
+```
+
+### 2. Write model quality eval tests (`tests/eval/`)
+Define what constitutes a valid LLM output:
+```python
+def test_listing_bullet_format(self):
+    listing = {"bullet_points": ["FEATURE: description text here"], "seo_score": 7.5}
+    self._eval(listing, keyword="water bottle")  # raises AssertionError on invalid output
+```
+
+### 3. Write unit tests (`tests/test_core.py`)
+Cover dataclass integrity, adapter factories, alert logic.
+
+### 4. Implement the feature
+
+Definition of done: **all three layers pass**.
+
+```bash
+pytest tests/ -v   # 48 tests, excludes real_llm
+```
+
+## Test File Map
+
+| Layer | Location | Mocks |
+|-------|----------|-------|
+| Acceptance | `tests/acceptance/test_user_scenarios.py` | Adapter + LLM |
+| Model Eval | `tests/eval/test_model_quality.py` | None (pure logic) |
+| Unit | `tests/test_core.py` | Minimal |
+| Real LLM (local) | `tests/real_llm/test_real_llm_quality.py` | None (live API) |
+
+### Mock architecture
+
+Each test that calls a module function needs two mocks:
+1. **Adapter mock** — `AmazonAdapter.get_best_sellers` / `get_reviews` / `get_ad_campaigns`
+2. **LLM mock** — `app.modules.{module}.{file}.get_llm_provider`
+
+The shared `client` fixture and env setup live in `tests/conftest.py`. Do **not** duplicate them per-file.
+
+```python
+# Wrong: per-file env setup
+os.environ.setdefault("OPENAI_API_KEY", "sk-test")
+
+# Right: handled by tests/conftest.py autouse fixture
+```
+
+### Running real LLM tests locally
+
+```bash
+cp .env.dev.example .env.dev
+# fill in OPENAI_API_KEY (any OpenAI-compatible key)
+source .env.dev && pytest tests/real_llm/ -m real_llm -s -v
+```
+
 ## Module Quick Reference
 
 | Module | File | Key function |

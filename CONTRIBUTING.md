@@ -6,7 +6,7 @@ Thank you for your interest in contributing to EcomAgent!
 
 ### Reporting Bugs
 
-Open a [GitHub Issue](https://github.com/yoligehude14753/ecom-agent/issues/new?template=bug_report.md) with:
+Open a [GitHub Issue](https://github.com/your-username/ecom-agent/issues/new?template=bug_report.md) with:
 - Steps to reproduce
 - Expected vs. actual behavior
 - Your environment (OS, Python version, Docker version)
